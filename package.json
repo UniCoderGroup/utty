@@ -1,0 +1,33 @@
+{
+  "name": "utty",
+  "version": "1.0.0",
+  "description": "An universal tty framework.",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "test": "node-dev --respawn --deps=-1 --clear src/test.ts",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UniCoderGroup/utty.git"
+  },
+  "keywords": [
+    "tty"
+  ],
+  "author": "_Kerman@UniCoder",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/UniCoderGroup/utty/issues"
+  },
+  "homepage": "https://github.com/UniCoderGroup/utty#readme",
+  "devDependencies": {
+    "@types/node": "^17.0.0",
+    "node-dev": "^7.1.0",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "strip-ansi": "^7.0.1"
+  }
+}

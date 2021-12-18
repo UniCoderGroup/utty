@@ -1,0 +1,21 @@
+name: Update to Gitee
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sync_to_gitee:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Update UTTY to Gitee.
+      uses: Yikun/hub-mirror-action@master
+      with:
+        src: github/UniCoderGroup
+        dst: gitee/UniCoderGroup
+        dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+        dst_token: ${{ secrets.GITEE_TOKEN }}
+        account_type: org
+        static_list: "utty"
+
