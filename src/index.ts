@@ -5,7 +5,7 @@ import stripAnsi from 'strip-ansi';
  * Get the number of lines of `str`.
  * It returns `1` when `str` has no `\n`.
  */
-getLines(str:string): number{
+function getLines(str:string): number{
     let lines = 1;
     for(let c of str){
         if(c === "\n"){
@@ -48,7 +48,7 @@ export default class UTty {
 
     _replace(str:string):void{
         this._clearLine();
-        this._write(str);
+        this._write(str,false);
     }
 
     _move(dChar:number,dLine:number){
@@ -74,7 +74,7 @@ export default class UTty {
     }
     
     _toNewLine(): void {
-        this._yTo(this.nLine);
+        this._toLine(this.nLine);
     }
 
     replace(line: number, str: string): void {
