@@ -1,6 +1,20 @@
 import { WriteStream as TtyWriteStream } from 'node:tty';
 //import stripAnsi from 'strip-ansi';
 
+/**
+ * Get the number of lines of `str`.
+ * It returns `1` when `str` has no `\n`.
+ */
+getLines(str:string): number{
+    let lines = 1;
+    for(let c of str){
+        if(c === "\n"){
+            lines++;
+        }
+    }
+    return lines;
+}
+
 export default class UTty {
     constructor(tty: TtyWriteStream & { fd: 1 }) {
         this.tty = tty;
@@ -10,11 +24,6 @@ export default class UTty {
      * The output stream.
      */
     tty: TtyWriteStream & { fd: 1 };
-
-    // /**
-    //  * Curent x coord in terminal (start by 0).
-    //  */
-    // x = 0;
 
     /**
      * Curent line in terminal (start by 0).
@@ -26,26 +35,11 @@ export default class UTty {
      */
     nLine = 0;
 
-    /**
-     * Write str and `'\n'` to stdout,
-     * and add this.y according to number of `'\n'`s.
-     */
-    push(str: string): void {
-        this.moveToLastLine();
-        this.tty.write(str + "\n");
-        for (let c of str) {
-            if (c === "\n") {
-                this.line++;
-                this.nLine++;
-            }
-        }
-        // add the additional "\n"
-        this.line++;
-        this.nLine++;
-    }
-
-    _write(str:string):void{
+    _write(str:string, add:boolean): void{
         this.tty.write(str);
+        let dLine = getLines(str) - 1;
+        this.line += dLine;
+        if(add) this.nLine += dLine;
     }
 
     _clearLine(dir: -1 | 0 | 1 = 0):void{
@@ -57,62 +51,54 @@ export default class UTty {
         this._write(str);
     }
 
-    _resetX():void{
-        this.tty.cursorTo(0);
-    }
-
-    _move(dx:number,dLine:number){
-        this.tty.moveCursor(dx,dLine);
+    _move(dChar:number,dLine:number){
+        this.tty.moveCursor(dChar,dLine);
         this.line+=dLine;
     }
 
-    _moveX(dx:number):void{
-        this._move(dx,0);
+    _moveChar(dChar:number):void{
+        this._move(dChar,0);
     }
 
-    _moveY(dLine:number):void{
+    _moveLine(dLine:number):void{
         this._move(0,dLine);
     }
+    
+    _toChar(char:number):void{
+        this.tty.cursorTo(char);
+    }
 
-    _yTo(line:number):void{
-        this._moveY(-this.line+line);
-        if(this.line!=line) throw new Error(`fn _yTo error: wanted to move to ${line}, but at ${this.line}`);
+    _toLine(line:number):void{
+        this._moveLine(-this.line+line);
+        if(this.line!=line) throw new Error(`fn _toLine error: wanted to move to line${line}, but at line${this.line}`);
     }
     
-    _moveToLastLine(): void {
+    _toNewLine(): void {
         this._yTo(this.nLine);
     }
 
-    /**
-     * Replace the line with a new string.
-     */
     replace(line: number, str: string): void {
-        this.moveToY(line);
+        this._toLine(line);
         this._replace(str);
     }
 
-    /**
-     * Move to the first line of line,
-     * and reset x coord to `0`.
-     * [BUG]: It cannot go to row that above the screen
-     */
-    moveToY(line: number): void {
-        this._resetX();
-        this._yTo(line);
-        if (this.line !== line) throw new Error("//");
+    moveToLine(line: number): void {
+        this._toLine(line);
+        this._toChar(0);
     }
-
-    /**
-     * Move to last line according to `this.yMax`.
-     */
 
     /**
      * Clear a line.
      * @param dir see param `dir` in http://nodejs.org/api/tty.html#writestreamclearlinedir-callback
      */
-    clearLine(dir: -1 | 0 | 1 = 0, line: number = this.line): void {
-        this.moveToY(line);
-        this._clearLine(0);
+    clearLine(line: number,dir: -1 | 0 | 1 = 0): void {
+        this._toLine(line);
+        this._clearLine(dir);
+    }
+    
+    pushLine(str:string):void{
+        this._toNewLine();
+        this._write(str, true);
     }
 
     /**
