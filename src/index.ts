@@ -1,5 +1,5 @@
 import { WriteStream as TtyWriteStream } from 'node:tty';
-import stripAnsi from 'strip-ansi';
+//import stripAnsi from 'strip-ansi';
 
 export default class UTty {
     constructor(tty: TtyWriteStream & { fd: 1 }) {
@@ -11,59 +11,84 @@ export default class UTty {
      */
     tty: TtyWriteStream & { fd: 1 };
 
-    /**
-     * Curent y coord in terminal (start by 0).
-     */
-    y = 0;
+    // /**
+    //  * Curent x coord in terminal (start by 0).
+    //  */
+    // x = 0;
 
     /**
-     * The max of y
+     * Curent line in terminal (start by 0).
      */
-    yMax = 0;
+    line = 0;
+
+    /**
+     * The number of lines.
+     */
+    nLine = 0;
 
     /**
      * Write str and `'\n'` to stdout,
      * and add this.y according to number of `'\n'`s.
      */
-    output(str: string, addYMax: boolean = true, line: number = this.yMax): void {
-        this.moveToLine(line);
+    push(str: string): void {
+        this.moveToLastLine();
         this.tty.write(str + "\n");
         for (let c of str) {
             if (c === "\n") {
-                this.y++;
-                if (addYMax) this.yMax++;
+                this.line++;
+                this.nLine++;
             }
         }
-        this.y++; // add the additional "\n"
-        if (addYMax) this.yMax++;
+        // add the additional "\n"
+        this.line++;
+        this.nLine++;
     }
 
-    /**
-     * Redraw the line.
-     */
-    redraw(line: number, str: string, addYMax: boolean = true): void {
-        if (line >= this.yMax && addYMax) {
-            this.yMax = line+1;
-        }
-        this.moveToLine(line);
-        this.clearLine();
-        this.output(str, false, line);
+    _write(str:string):void{
+        this.tty.write(str);
     }
 
-    /**
-     *  Reset `x` coord to 0
-     */
-    resetX(): void {
+    _clearLine(dir: -1 | 0 | 1 = 0):void{
+        this.tty.clearLine(dir);
+    }
+
+    _replace(str:string):void{
+        this._clearLine();
+        this._write(str);
+    }
+
+    _resetX():void{
         this.tty.cursorTo(0);
     }
 
+    _move(dx:number,dLine:number){
+        this.tty.moveCursor(dx,dLine);
+        this.line+=dLine;
+    }
+
+    _moveX(dx:number):void{
+        this._move(dx,0);
+    }
+
+    _moveY(dLine:number):void{
+        this._move(0,dLine);
+    }
+
+    _yTo(line:number):void{
+        this._moveY(-this.line+line);
+        if(this.line!=line) throw new Error(`fn _yTo error: wanted to move to ${line}, but at ${this.line}`);
+    }
+    
+    _moveToLastLine(): void {
+        this._yTo(this.nLine);
+    }
+
     /**
-     * Move y coord of cursor
-     * and add `dy` to `this.y`
+     * Replace the line with a new string.
      */
-    moveY(dy: number): void {
-        this.tty.moveCursor(0, dy);
-        this.y += dy;
+    replace(line: number, str: string): void {
+        this.moveToY(line);
+        this._replace(str);
     }
 
     /**
@@ -71,27 +96,23 @@ export default class UTty {
      * and reset x coord to `0`.
      * [BUG]: It cannot go to row that above the screen
      */
-    moveToLine(line: number): void {
-        this.resetX();
-        this.moveY(-(this.y - line));
-        if(this.y!==line)throw new Error("//");
+    moveToY(line: number): void {
+        this._resetX();
+        this._yTo(line);
+        if (this.line !== line) throw new Error("//");
     }
 
     /**
      * Move to last line according to `this.yMax`.
      */
-    moveToLastLine(): void {
-        this.resetX();
-        this.moveY(this.yMax - this.y);
-    }
 
     /**
      * Clear a line.
      * @param dir see param `dir` in http://nodejs.org/api/tty.html#writestreamclearlinedir-callback
      */
-    clearLine(dir: -1 | 0 | 1 = 0, line: number = this.y): void {
-        this.moveToLine(line);
-        this.tty.clearLine(dir);
+    clearLine(dir: -1 | 0 | 1 = 0, line: number = this.line): void {
+        this.moveToY(line);
+        this._clearLine(0);
     }
 
     /**
@@ -101,6 +122,7 @@ export default class UTty {
      * @returns The display length of str.
      */
     getStrDisplayWidth(str: string): number {
-        return stripAnsi(str).length;
+        //return stripAnsi(str).length;
+        return str.length;
     }
 }
