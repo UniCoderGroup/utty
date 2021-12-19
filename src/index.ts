@@ -1,5 +1,5 @@
 import { WriteStream as TtyWriteStream } from 'node:tty';
-//import stripAnsi from 'strip-ansi';
+import stripAnsi from 'strip-ansi';
 
 /**
  * Get the number of lines of `str`.
@@ -108,7 +108,7 @@ export default class UTty {
      * @returns The display length of str.
      */
     getStrDisplayWidth(str: string): number {
-        //return stripAnsi(str).length;
-        return str.length;
+        return stripAnsi(str).length;
+        //return str.length;
     }
 }
