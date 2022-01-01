@@ -94,7 +94,7 @@
     "src"
   ],
   "exclude": [
-    "src/test.ts",
+    "src/index.test.ts",
     ".github"
   ]
 }

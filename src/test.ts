@@ -1,2 +1,0 @@
-import UTty from "./index";
-
