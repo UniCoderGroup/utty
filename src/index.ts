@@ -48,10 +48,10 @@ function getLineNum(str: string): number {
 }
 
 export interface StdTty {
-    write(buffer: Uint8Array | string, cb?: (err?: Error) => void): boolean;
-    clearLine(dir: -1 | 0 | 1, callback?: () => void): boolean;
-    moveCursor(dx: number, dy: number, callback?: () => void): boolean;
-    cursorTo(x: number, y?: number, callback?: () => void): boolean;
+    write(buffer: Uint8Array | string): boolean;
+    clearLine(dir: -1 | 0 | 1): boolean;
+    moveCursor(dx: number, dy: number): boolean;
+    cursorTo(x: number, y?: number): boolean;
 }
 
 export default class UStdTty implements UTty {
