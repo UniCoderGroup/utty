@@ -9,6 +9,12 @@ export default interface UTty {
     pushLine(str: string): void;
 
     /**
+     * 
+     * Pop the last line.
+     */
+    popLine():void;
+
+    /**
      * Replace a line.
      */
     replace(line: number, str: string): void;
