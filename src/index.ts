@@ -3,6 +3,19 @@
  * A standard for tty.
  */
 export default interface UTty {
+
+    /**
+     * A `number` specifying the number of columns the TTY currently has. This property
+     * is updated whenever the `'resize'` event is emitted.
+     */
+    columns: number;
+
+    /**
+     * A `number` specifying the number of rows the TTY currently has. This property
+     * is updated whenever the `'resize'` event is emitted.
+     */
+    rows: number;
+
     /**
      * Push a new line at the end of lines.
      */
@@ -12,7 +25,7 @@ export default interface UTty {
      * 
      * Pop the last line.
      */
-    popLine():void;
+    popLine(): void;
 
     /**
      * Replace a line.
@@ -26,4 +39,10 @@ export default interface UTty {
      * @returns The display length of str.
      */
     getStrDisplayWidth(str: string): number;
+
+    /**
+     * When the tty resizes, call listeners.
+     * Listeners should be stored in a array, and each one should be called.
+     */
+    onResize(listener: () => void): boolean;
 }
