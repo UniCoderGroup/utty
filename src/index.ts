@@ -1,8 +1,32 @@
 /**
+ * A Configuration of what this UTty supports.
+ */
+export interface UTtyConfig {
+    /**
+     * @description Save how many colors is supported in this tty
+     * -  Node.js style -> `"NJS:x"`, `x` is a number.
+     * 
+     *    `x`=`1` for 2, `4` for 16, `8` for 256, `24` for 16,777,216 colors supported.
+     *
+     * - HTML/CSS supported -> `"BROWSER"` 
+     */
+    color?: string;
+
+}
+
+export interface LineContext {
+    [key: string]: unknown;
+}
+
+/**
  * UTty's main declaration.
  * A standard for tty.
  */
 export default interface UTty {
+    /**
+     * Configuration.
+     */
+    readonly config: UTtyConfig;
 
     /**
      * A `number` specifying the number of columns the TTY currently has. This property
@@ -19,7 +43,7 @@ export default interface UTty {
     /**
      * Push a new line at the end of lines.
      */
-    pushLine(str: string): void;
+    pushLine(str: string, ctx: LineContext): void;
 
     /**
      * 
